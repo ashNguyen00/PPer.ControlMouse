@@ -36,6 +36,7 @@
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.txtKeySelected = new System.Windows.Forms.ToolStripTextBox();
+            this.txtPosSelected = new System.Windows.Forms.ToolStripTextBox();
             this.btnReload = new System.Windows.Forms.ToolStripButton();
             this.mousePosTimer = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
@@ -45,7 +46,6 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.txtPosSelected = new System.Windows.Forms.ToolStripTextBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -75,8 +75,6 @@
             this.btnAddNewPos.Size = new System.Drawing.Size(23, 22);
             this.btnAddNewPos.Text = "toolStripButton1";
             this.btnAddNewPos.Click += new System.EventHandler(this.btnAddNewPos_Click);
-            this.btnAddNewPos.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnSelectPos_MouseDown);
-            this.btnAddNewPos.MouseMove += new System.Windows.Forms.MouseEventHandler(this.btnSelectPos_MouseMove);
             // 
             // toolStripButton1
             // 
@@ -108,7 +106,13 @@
             this.txtKeySelected.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtKeySelected.Name = "txtKeySelected";
             this.txtKeySelected.Size = new System.Drawing.Size(50, 25);
-            this.txtKeySelected.Click += new System.EventHandler(this.toolStripTextBox1_Click);
+            // 
+            // txtPosSelected
+            // 
+            this.txtPosSelected.Enabled = false;
+            this.txtPosSelected.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtPosSelected.Name = "txtPosSelected";
+            this.txtPosSelected.Size = new System.Drawing.Size(100, 25);
             // 
             // btnReload
             // 
@@ -198,13 +202,6 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "A";
             this.button1.UseVisualStyleBackColor = true;
-            // 
-            // txtPosSelected
-            // 
-            this.txtPosSelected.Enabled = false;
-            this.txtPosSelected.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtPosSelected.Name = "txtPosSelected";
-            this.txtPosSelected.Size = new System.Drawing.Size(100, 25);
             // 
             // Form1
             // 
