@@ -12,59 +12,100 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Gma.System.MouseKeyHook;
+using System.Reflection.Emit;
 
 namespace PPer.ControlMouse
 {
     public partial class Form1 : Form
     {
         private Point mouseLocation;
-        private const int WH_MOUSE_LL = 14;
-        private const int WH_KEYBOARD_LL = 13;
-        const uint MOUSEEVENTF_LEFTDOWN = 0x02;
-        const uint MOUSEEVENTF_LEFTUP = 0x04;
-        const uint WM_LBUTTONDOWN = 0x12;
-        const uint WM_RBUTTONDOWN = 0x13;
-        private const int WM_KEYDOWN = 0x0100;
-        public static ToolStripTextBox txtKeySel;
-        public static ToolStripTextBox txtPosSel;
-        private static LowLevelKeyboardProc m_procKeyboard = callbackKeyboardHook;
-        private static MouseProc m_procMouse = callbackMouseHook;
-        private List<string> m_keyList = new List<string>();
-        private static IntPtr _keyboardHookID = IntPtr.Zero;
+        private Point mouseLocSelected;
+        private static IKeyboardMouseEvents m_globalHook;
         private string pathConf = "binConf.bin";
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-        private delegate IntPtr MouseProc(int nCode, IntPtr wParam, IntPtr lParam);
+        private Dictionary<string, Point> m_keyList = new Dictionary<string, Point>();
 
-
-        // Hàm gọi WinAPI để click chuột
-        [DllImport("user32.dll")]
-        static extern bool SetCursorPos(int X, int Y);
-        [DllImport("user32.dll")]
-        static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetWindowsHookEx(int idHook, MouseProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll")]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode,
-            IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
+        public static ToolStripTextBox txtKeySel;
+        public static ToolStripTextBox txtPosSel; 
         public Form1()
         {
             InitializeComponent();
             txtKeySel = txtKeySelected;
             txtPosSel = txtPosSelected;
+
+            m_globalHook = Hook.GlobalEvents();
+            m_globalHook.KeyDown += GlobalHookKeyDown;
+            
+            m_globalHook.MouseDown += GlobalHookMouseDown;
+            m_globalHook.MouseUp += GlobalHookMouseUp;
+            m_globalHook.MouseClick += GlobalHookMouseClick;
+            //m_globalHook.MouseMove += GlobalHookMouseMove;
+            Console.WriteLine("Listening for global key presses. Press ESC to exit...");
+
             this.mousePosTimer.Start();
-            _keyboardHookID = SetHookKeyboard(m_procKeyboard);
+        }
+        // Xử lý sự kiện nhấn chuột
+        private void GlobalHookMouseDown(object sender, MouseEventArgs e)
+        {
+            //txtKeySel.Text = $"Mouse Down at: {e.Location} | Button: {e.Button}";
         }
 
+        // Xử lý sự kiện thả chuột
+        private void GlobalHookMouseUp(object sender, MouseEventArgs e)
+        {
+            //txtKeySel.Text = $"Mouse Up at: {e.Location} | Button: {e.Button}";
+        }
+        private void GlobalHookMouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left) { }
+            //txtKeySel.Text = $"{e.Location}";
+            else
+            {
+                mouseLocSelected = e.Location;
+                txtPosSel.Text = $"{e.Location}";
+            }
+
+        }
+
+        // Xử lý sự kiện di chuyển chuột
+        private void GlobalHookMouseMove(object sender, MouseEventArgs e)
+        {
+            txtKeySel.Text = $"Mouse Move at: {e.Location}";
+        }
+        private static void GlobalHookKeyDown(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine($"Key pressed: {e.KeyCode}");
+            txtKeySel.Text = e.KeyCode.ToString();
+        }
+
+        private void btnDeletePos_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnEditPos_Click(object sender, EventArgs e)
+        {
+            if (txtKeySel.Text == "")
+            {
+                MessageBox.Show("Vui lòng chọn KEY trước khi ADD");
+                return;
+            }
+            if (txtPosSel.Text == "")
+            {
+                MessageBox.Show("Vui lòng chọn KEY trước khi click chuột");
+                return;
+            }
+            foreach (string key in m_keyList.Keys)
+            {
+                if (key.StartsWith(txtKeySel.Text) == true)
+                {
+                    MessageBox.Show("Vị trí đã được chọn trước đó");
+                    return;
+                }
+            }
+            MessageBox.Show("Vị trí chưa được thêm trước đó");
+            return;
+        }
         private void btnAddNewPos_Click(object sender, EventArgs e)
         {
             if (txtKeySel.Text == "")
@@ -77,22 +118,46 @@ namespace PPer.ControlMouse
                 MessageBox.Show("Vui lòng chọn Key trước khi click chuột");
                 return;
             }
-            if (m_keyList.Contains(encodeKeyValue(txtKeySel.Text, mouseLocation)) == true)
+            foreach (string key in m_keyList.Keys)
+            {
+                if (key.StartsWith(txtKeySel.Text) == true)
+                {
+                    MessageBox.Show("Vị trí đã được chọn trước đó");
+                    return;
+                }
+            }
+            if (m_keyList.Keys.Contains(encodeKeyValue(txtKeySel.Text, mouseLocSelected)) == true)
             {
                 MessageBox.Show("Vị trí đã được chọn trước đó");
                 return;
             }
-            m_keyList.Add(encodeKeyValue(txtKeySel.Text, mouseLocation));
+            m_keyList[txtKeySel.Text] = mouseLocSelected;
+            addNewButton(txtKeySel.Text);
         }
 
-        private void btnSelectPos_MouseDown(object sender, MouseEventArgs e)
+        private void addNewButton(string txtVal)
         {
-
+            Button btn = new System.Windows.Forms.Button();
+            this.panel1.Controls.Add(btn);
+            btn.Dock = System.Windows.Forms.DockStyle.Left;
+            btn.Location = new System.Drawing.Point(375, 0);
+            btn.Name = txtVal;
+            btn.Size = new System.Drawing.Size(75, 24);
+            btn.TabIndex = 5;
+            btn.Text = txtVal;
+            btn.Click += btnClick;
+            btn.UseVisualStyleBackColor = true;
         }
 
-        private void btnSelectPos_MouseMove(object sender, MouseEventArgs e)
+        private void btnClick(object sender, EventArgs e)
         {
-
+            if (sender is Button btn)
+            {
+                string name = btn.Text;
+                string text = btn.Text;
+                Console.WriteLine($"name: {name} | text: {text}");
+                // Thực hiện hành động click chuột tại vị trí po
+            }
         }
 
         private void mousePosTimer_Tick(object sender, EventArgs e)
@@ -101,74 +166,8 @@ namespace PPer.ControlMouse
             this.Text = "Mouse Position: " + mouseLocation.ToString();
         }
 
-        private static IntPtr SetHookKeyboard(LowLevelKeyboardProc proc)
-        {
-            using (var curProcess = Process.GetCurrentProcess())
-            using (var curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-            }
-        }
+    
 
-        private static IntPtr SetHookMouse(MouseProc proc)
-        {
-            using (var curProcess = Process.GetCurrentProcess())
-            using (var curModule = curProcess.MainModule)
-            {
-                // Cài đặt hook khi ứng dụng bắt đầu
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-            }
-        }
-
-        //private IntPtr MouseHookProc(int nCode, IntPtr wParam, IntPtr lParam)
-        //{
-        //    if (nCode >= 0)
-        //    {
-        //        // Nếu chuột được click trái
-        //        if (wParam == (IntPtr)WM_LBUTTONDOWN)
-        //        {
-        //            Console.WriteLine("Chuột trái đã được nhấn");
-        //        }
-        //        // Nếu chuột được click phải
-        //        else if (wParam == (IntPtr)WM_RBUTTONDOWN)
-        //        {
-        //            Console.WriteLine("Chuột phải đã được nhấn");
-        //        }
-        //    }
-
-        //    // Chuyển tiếp sự kiện cho hook tiếp theo trong chuỗi
-        //    return CallNextHookEx(_mouseHookHandle, nCode, wParam, lParam);
-        //}
-        private static IntPtr callbackKeyboardHook(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
-            {
-                int vkCode = Marshal.ReadInt32(lParam);
-                string keyName = ((Keys)vkCode).ToString();
-                Console.WriteLine($"Bạn nhấn phím: {keyName}");
-                txtKeySel.Text = keyName;
-                // Có thể ghi log vào file, hiển thị, xử lý tùy ý
-            }
-            return CallNextHookEx(_keyboardHookID, nCode, wParam, lParam);
-        }
-        private static IntPtr callbackMouseHook(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
-            {
-                int vkCode = Marshal.ReadInt32(lParam);
-                string keyName = ((Keys)vkCode).ToString();
-                Console.WriteLine($"Bạn nhấn phím: {keyName}");
-                txtKeySel.Text = keyName;
-                // Có thể ghi log vào file, hiển thị, xử lý tùy ý
-            }
-            return CallNextHookEx(_keyboardHookID, nCode, wParam, lParam);
-        }
-        public void DoMouseClick(int x, int y)
-        {
-            SetCursorPos(x, y); // Đưa chuột tới vị trí cần click
-            mouse_event(MOUSEEVENTF_LEFTDOWN, x, y, 0, UIntPtr.Zero); // Nhấn chuột trái
-            mouse_event(MOUSEEVENTF_LEFTUP, x, y, 0, UIntPtr.Zero);   // Nhả chuột trái
-        }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
@@ -213,8 +212,9 @@ namespace PPer.ControlMouse
             Console.WriteLine("Decoded JSON: " + jsonDecoded);
 
             // Deserialize JSON string thành List<string>
-            m_keyList = JsonConvert.DeserializeObject<List<string>>(jsonDecoded);
+            m_keyList = JsonConvert.DeserializeObject<Dictionary<string, Point>>(jsonDecoded);
             Console.WriteLine("Deserialized List: " + string.Join(", ", m_keyList));
         }
+
     }
 }

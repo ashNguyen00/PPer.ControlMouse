@@ -36,3 +36,4 @@ D:\Projects\2.CSharp\PPer\PPer.ControlMouse\PPer.ControlMouse\bin\Debug\System.B
 D:\Projects\2.CSharp\PPer\PPer.ControlMouse\PPer.ControlMouse\bin\Debug\System.Numerics.Vectors.xml
 D:\Projects\2.CSharp\PPer\PPer.ControlMouse\PPer.ControlMouse\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 D:\Projects\2.CSharp\PPer\PPer.ControlMouse\PPer.ControlMouse\obj\Debug\PPer.Con.8BDF47F9.Up2Date
+D:\Projects\2.CSharp\PPer\PPer.ControlMouse\PPer.ControlMouse\bin\Debug\Gma.System.MouseKeyHook.dll
