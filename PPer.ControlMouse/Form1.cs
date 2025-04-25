@@ -22,17 +22,29 @@ namespace PPer.ControlMouse
         private Point mouseLocation;
         private Point mouseLocSelected;
         private static IKeyboardMouseEvents m_globalHook;
+        private static object lockClick = new object();
         private string pathConf = "binConf.bin";
         private Dictionary<string, Point> m_keyList = new Dictionary<string, Point>();
 
         public static ToolStripTextBox txtKeySel;
         public static ToolStripTextBox txtPosSel; 
+        private void updateCBBWaitTimer()
+        {
+            cbbWaitTimer.Items.Clear();
+            for (int i=1; i< 20; i++)
+            {
+                cbbWaitTimer.Items.Add(i);
+            }
+            cbbWaitTimer.SelectedIndex = 0;
+        }
         public Form1()
         {
             InitializeComponent();
+
+            updateCBBWaitTimer();
             txtKeySel = txtKeySelected;
             txtPosSel = txtPosSelected;
-
+            
             m_globalHook = Hook.GlobalEvents();
             m_globalHook.KeyDown += GlobalHookKeyDown;
             
@@ -72,6 +84,7 @@ namespace PPer.ControlMouse
         {
             txtKeySel.Text = $"Mouse Move at: {e.Location}";
         }
+
         private static void GlobalHookKeyDown(object sender, KeyEventArgs e)
         {
             Console.WriteLine($"Key pressed: {e.KeyCode}");
@@ -80,59 +93,72 @@ namespace PPer.ControlMouse
 
         private void btnDeletePos_Click(object sender, EventArgs e)
         {
-
+            //string 
+            //m_keyList.Remove()
         }
 
         private void btnEditPos_Click(object sender, EventArgs e)
         {
-            if (txtKeySel.Text == "")
+
+            string _k = txtKeySel.Text;
+            string _p = txtPosSel.Text;
+            if (_k == "")
             {
-                MessageBox.Show("Vui lòng chọn KEY trước khi ADD");
+                MessageBox.Show("Vui lòng chọn phím trước khi ADD");
                 return;
             }
             if (txtPosSel.Text == "")
             {
-                MessageBox.Show("Vui lòng chọn KEY trước khi click chuột");
+                MessageBox.Show("Vui lòng chọn tọa độ lưu trước. \nDi chuột đến vị trí lưu và nhấn chuột phải để lưu tọa độ.");
                 return;
             }
+            bool existBtn = false;
             foreach (string key in m_keyList.Keys)
             {
-                if (key.StartsWith(txtKeySel.Text) == true)
+                if (key.StartsWith(_k) == true)
                 {
-                    MessageBox.Show("Vị trí đã được chọn trước đó");
-                    return;
+                    existBtn = true;
+                    break;
                 }
             }
-            MessageBox.Show("Vị trí chưa được thêm trước đó");
-            return;
+            if (existBtn == false)
+            {
+                MessageBox.Show("Phím chưa được tạo. Vui lòng tạo phím mới.");
+                return;
+            }
+            m_keyList[_k] = mouseLocSelected;
         }
+
         private void btnAddNewPos_Click(object sender, EventArgs e)
         {
-            if (txtKeySel.Text == "")
+            string _k = txtKeySel.Text;
+            string _p = txtPosSel.Text;
+
+            if (_k == "")
             {
-                MessageBox.Show("Vui lòng chọn Key trước khi click chuột");
+                MessageBox.Show("Vui lòng chọn phím lưu trước");
                 return;
             }
-            if (txtKeySel.Text == "")
+            if (_p == "")
             {
-                MessageBox.Show("Vui lòng chọn Key trước khi click chuột");
+                MessageBox.Show("Vui lòng chọn tọa độ lưu trước. \nDi chuột đến vị trí lưu và nhấn chuột phải để lưu tọa độ.");
                 return;
             }
             foreach (string key in m_keyList.Keys)
             {
-                if (key.StartsWith(txtKeySel.Text) == true)
+                if (key.StartsWith(_k) == true)
                 {
-                    MessageBox.Show("Vị trí đã được chọn trước đó");
+                    MessageBox.Show("Vị trí đã được chọn trước đó.\nNếu muốn update tọa độ thì chọn Edit.");
                     return;
                 }
             }
-            if (m_keyList.Keys.Contains(encodeKeyValue(txtKeySel.Text, mouseLocSelected)) == true)
+            if (m_keyList.Keys.Contains(encodeKeyValue(_k, mouseLocSelected)) == true)
             {
                 MessageBox.Show("Vị trí đã được chọn trước đó");
                 return;
             }
-            m_keyList[txtKeySel.Text] = mouseLocSelected;
-            addNewButton(txtKeySel.Text);
+            m_keyList[_k] = mouseLocSelected;
+            addNewButton(_k);
         }
 
         private void addNewButton(string txtVal)
@@ -155,7 +181,8 @@ namespace PPer.ControlMouse
             {
                 string name = btn.Text;
                 string text = btn.Text;
-                Console.WriteLine($"name: {name} | text: {text}");
+                Console.WriteLine($"name: {name} | text: {m_keyList[btn.Text]}");
+                MessageBox.Show($"Phím - {name}: {m_keyList[btn.Text]}");
                 // Thực hiện hành động click chuột tại vị trí po
             }
         }
@@ -214,6 +241,11 @@ namespace PPer.ControlMouse
             // Deserialize JSON string thành List<string>
             m_keyList = JsonConvert.DeserializeObject<Dictionary<string, Point>>(jsonDecoded);
             Console.WriteLine("Deserialized List: " + string.Join(", ", m_keyList));
+        }
+
+        private void setClick()
+        {
+
         }
 
     }

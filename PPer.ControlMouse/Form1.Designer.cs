@@ -40,6 +40,9 @@
             this.btnReload = new System.Windows.Forms.ToolStripButton();
             this.mousePosTimer = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.lblWaitTimer = new System.Windows.Forms.ToolStripLabel();
+            this.cbbWaitTimer = new System.Windows.Forms.ToolStripComboBox();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,10 +55,13 @@
             this.toolStripLabel1,
             this.txtKeySelected,
             this.txtPosSelected,
-            this.btnReload});
+            this.btnReload,
+            this.toolStripButton1,
+            this.lblWaitTimer,
+            this.cbbWaitTimer});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(438, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(715, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -129,14 +135,36 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 25);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(438, 41);
+            this.panel1.Size = new System.Drawing.Size(715, 41);
             this.panel1.TabIndex = 1;
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton1.Text = "toolStripButton1";
+            // 
+            // lblWaitTimer
+            // 
+            this.lblWaitTimer.Name = "lblWaitTimer";
+            this.lblWaitTimer.Size = new System.Drawing.Size(65, 22);
+            this.lblWaitTimer.Text = "WaitTimer:";
+            // 
+            // cbbWaitTimer
+            // 
+            this.cbbWaitTimer.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbbWaitTimer.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
+            this.cbbWaitTimer.Name = "cbbWaitTimer";
+            this.cbbWaitTimer.Size = new System.Drawing.Size(75, 25);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(438, 66);
+            this.ClientSize = new System.Drawing.Size(715, 66);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "Form1";
@@ -160,6 +188,9 @@
         private System.Windows.Forms.ToolStripButton btnEditPos;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolStripTextBox txtPosSelected;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripLabel lblWaitTimer;
+        private System.Windows.Forms.ToolStripComboBox cbbWaitTimer;
     }
 }
 
