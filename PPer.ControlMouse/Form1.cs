@@ -19,6 +19,11 @@ namespace PPer.ControlMouse
 {
     public partial class Form1 : Form
     {
+        public enum run_mode
+        {
+            auto,
+            manual
+        }
         private Point mouseLocation;
         private Point mouseLocSelected;
         private static IKeyboardMouseEvents m_globalHook;
@@ -26,25 +31,71 @@ namespace PPer.ControlMouse
         private string pathConf = "binConf.bin";
         private Dictionary<string, Point> m_keyList = new Dictionary<string, Point>();
 
+
+        [DllImport("user32.dll")]
+        public static extern bool SetCursorPos(int X, int Y);
+
+        [DllImport("user32.dll")]
+        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, UIntPtr dwExtraInfo);
+
+        const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        const uint MOUSEEVENTF_LEFTUP = 0x0004;
+        const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
+        const uint MOUSEEVENTF_RIGHTUP = 0x0010;
+
+        public static void MouseLeftClick(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+            mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+        public static void MouseRightClick(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_RIGHTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+            mouse_event(MOUSEEVENTF_RIGHTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+        public static void MouseLeftDown(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+        public static void MouseLeftUp(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+        public static void MouseRightDown(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_RIGHTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+        public static void MouseRightUp(int x, int y)
+        {
+            SetCursorPos(x, y);
+            mouse_event(MOUSEEVENTF_RIGHTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+        }
+
+
         public static ToolStripTextBox txtKeySel;
         public static ToolStripTextBox txtPosSel; 
-        private void updateCBBWaitTimer()
-        {
-            cbbWaitTimer.Items.Clear();
-            for (int i=1; i< 20; i++)
-            {
-                cbbWaitTimer.Items.Add(i);
-            }
-            cbbWaitTimer.SelectedIndex = 0;
-        }
+ 
         public Form1()
         {
+
             InitializeComponent();
 
-            updateCBBWaitTimer();
             txtKeySel = txtKeySelected;
             txtPosSel = txtPosSelected;
-            
+            string[] listNames = Enum.GetNames(typeof(run_mode)).ToArray();
+
+            cbbRunMode.Items.AddRange(listNames);
+            cbbRunMode.SelectedIndex = 0;
             m_globalHook = Hook.GlobalEvents();
             m_globalHook.KeyDown += GlobalHookKeyDown;
             
@@ -55,6 +106,8 @@ namespace PPer.ControlMouse
             Console.WriteLine("Listening for global key presses. Press ESC to exit...");
 
             this.mousePosTimer.Start();
+            deserialize();
+            ReloadButtons();
         }
         // Xử lý sự kiện nhấn chuột
         private void GlobalHookMouseDown(object sender, MouseEventArgs e)
@@ -85,16 +138,30 @@ namespace PPer.ControlMouse
             txtKeySel.Text = $"Mouse Move at: {e.Location}";
         }
 
-        private static void GlobalHookKeyDown(object sender, KeyEventArgs e)
+        private void GlobalHookKeyDown(object sender, KeyEventArgs e)
         {
+            if (cbbRunMode.Text == run_mode.auto.ToString())
+            {
+                if (m_keyList.ContainsKey(e.KeyCode.ToString()))
+                {
+                    int _x = m_keyList[e.KeyCode.ToString()].X;
+                    int _y = m_keyList[e.KeyCode.ToString()].Y;
+                    SetCursorPos(_x, _y);
+                    MouseLeftClick(_x, _y);
+                    // Click chuột trái
+                    //mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                    //mouse_event(MOUSEEVENTF_LEFTUP, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+
+                }
+            }    
             Console.WriteLine($"Key pressed: {e.KeyCode}");
             txtKeySel.Text = e.KeyCode.ToString();
+            
         }
 
-        private void btnDeletePos_Click(object sender, EventArgs e)
+        private void actionControl(string key)
         {
-            //string 
-            //m_keyList.Remove()
+            Keys action = (Keys)Enum.Parse(typeof(Keys), key);
         }
 
         private void btnEditPos_Click(object sender, EventArgs e)
@@ -175,6 +242,30 @@ namespace PPer.ControlMouse
             btn.UseVisualStyleBackColor = true;
         }
 
+        private void RemoveButton(string txtVal)
+        {
+            Control btn = this.panel1.Controls[txtVal];
+            if (btn != null && btn is Button)
+            {
+                this.panel1.Controls.Remove(btn);
+                btn.Dispose(); // Giải phóng tài nguyên
+            }
+        }
+        private void ReloadButtons()
+        {
+            lock (this.panel1.Controls)
+            {
+                this.panel1.Controls.Clear();
+                
+                foreach (string kList in m_keyList.Keys)
+                {
+                    addNewButton(kList);
+                }
+                GC.Collect();
+            }
+
+        }
+
         private void btnClick(object sender, EventArgs e)
         {
             if (sender is Button btn)
@@ -182,7 +273,19 @@ namespace PPer.ControlMouse
                 string name = btn.Text;
                 string text = btn.Text;
                 Console.WriteLine($"name: {name} | text: {m_keyList[btn.Text]}");
-                MessageBox.Show($"Phím - {name}: {m_keyList[btn.Text]}");
+
+                DialogResult result = MessageBox.Show(
+                    $"Phím - {name}: {m_keyList[btn.Text]}.\n" +
+                    $"Bạn có muốn xóa phím không?",
+                    "Xác nhận",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question
+                );
+                if (result == DialogResult.OK)
+                {
+                    m_keyList.Remove(text);
+                    RemoveButton(text);
+                }
                 // Thực hiện hành động click chuột tại vị trí po
             }
         }
@@ -226,9 +329,9 @@ namespace PPer.ControlMouse
 
             File.WriteAllBytes(pathConf, binaryData);
 
-            Console.WriteLine("Binary Data: " + BitConverter.ToString(binaryData));
+            Console.WriteLine($"Binary Data: {pathConf}" + BitConverter.ToString(binaryData));
         }
-        private void deserialize(string path)
+        private void deserialize()
         {
 
             // Đọc
@@ -241,12 +344,18 @@ namespace PPer.ControlMouse
             // Deserialize JSON string thành List<string>
             m_keyList = JsonConvert.DeserializeObject<Dictionary<string, Point>>(jsonDecoded);
             Console.WriteLine("Deserialized List: " + string.Join(", ", m_keyList));
+
         }
 
-        private void setClick()
+        private void btnSave_Click(object sender, EventArgs e)
         {
-
+            serialize();
         }
 
+        private void btnReload_Click(object sender, EventArgs e)
+        {
+            deserialize();
+            ReloadButtons();
+        }
     }
 }
