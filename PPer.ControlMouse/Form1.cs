@@ -367,5 +367,20 @@ namespace PPer.ControlMouse
             deserialize();
             ReloadButtons();
         }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("" +
+                "1. mouse right click to change mouse position. \r\n" +
+                "2. press any keypress to set \r\n" +
+                "3. features: add new, edit old, delete old, save, reload from file\r\n" +
+                " - click chuột phải để điền tọa độ của chuột\r\n" +
+                " - nhấn phím muốn cài đặt để control\r\n" +
+                " - nhấn dấu cộng để lưu\r\n" +
+                " - nhấn phím cạnh dấu cộng để sửa phím đã chọn ở bước trên\r\n" +
+                " - khi có nút đã lưu bên dưới click vào đó để xóa phím." +
+                " - save và load config từ 2 nút bên tay phải." +
+                "");
+        }
     }
 }

@@ -38,10 +38,11 @@
             this.txtPosSelected = new System.Windows.Forms.ToolStripTextBox();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.btnReload = new System.Windows.Forms.ToolStripButton();
+            this.lblRunMode = new System.Windows.Forms.ToolStripLabel();
+            this.cbbRunMode = new System.Windows.Forms.ToolStripComboBox();
             this.mousePosTimer = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
-            this.cbbRunMode = new System.Windows.Forms.ToolStripComboBox();
-            this.lblRunMode = new System.Windows.Forms.ToolStripLabel();
+            this.btnHelp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,6 +54,7 @@
             this.toolStripLabel1,
             this.txtKeySelected,
             this.txtPosSelected,
+            this.btnHelp,
             this.btnSave,
             this.btnReload,
             this.lblRunMode,
@@ -125,6 +127,19 @@
             this.btnReload.Text = "toolStripButton2";
             this.btnReload.Click += new System.EventHandler(this.btnReload_Click);
             // 
+            // lblRunMode
+            // 
+            this.lblRunMode.Name = "lblRunMode";
+            this.lblRunMode.Size = new System.Drawing.Size(41, 22);
+            this.lblRunMode.Text = "Mode:";
+            // 
+            // cbbRunMode
+            // 
+            this.cbbRunMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbbRunMode.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
+            this.cbbRunMode.Name = "cbbRunMode";
+            this.cbbRunMode.Size = new System.Drawing.Size(121, 25);
+            // 
             // mousePosTimer
             // 
             this.mousePosTimer.Tick += new System.EventHandler(this.mousePosTimer_Tick);
@@ -138,18 +153,16 @@
             this.panel1.Size = new System.Drawing.Size(715, 41);
             this.panel1.TabIndex = 1;
             // 
-            // cbbRunMode
+            // btnHelp
             // 
-            this.cbbRunMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbbRunMode.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
-            this.cbbRunMode.Name = "cbbRunMode";
-            this.cbbRunMode.Size = new System.Drawing.Size(121, 25);
-            // 
-            // lblRunMode
-            // 
-            this.lblRunMode.Name = "lblRunMode";
-            this.lblRunMode.Size = new System.Drawing.Size(41, 22);
-            this.lblRunMode.Text = "Mode:";
+            this.btnHelp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnHelp.Image = ((System.Drawing.Image)(resources.GetObject("btnHelp.Image")));
+            this.btnHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(23, 22);
+            this.btnHelp.Text = "toolStripButton1";
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
             // 
             // Form1
             // 
@@ -181,6 +194,7 @@
         private System.Windows.Forms.ToolStripButton btnReload;
         private System.Windows.Forms.ToolStripLabel lblRunMode;
         private System.Windows.Forms.ToolStripComboBox cbbRunMode;
+        private System.Windows.Forms.ToolStripButton btnHelp;
     }
 }
 
