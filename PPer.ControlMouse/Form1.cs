@@ -142,27 +142,21 @@ namespace PPer.ControlMouse
         {
             txtKeySel.Text = $"Mouse Move at: {e.Location}";
         }
-
-        private object lockSetMouse = new object();
         private void GlobalHookKeyDown(object sender, KeyEventArgs e)
         {
-            lock (lockSetMouse)
+            if (cbbRunMode.Text == run_mode.auto.ToString())
             {
-                if (cbbRunMode.Text == run_mode.auto.ToString())
+                if (m_keyList.ContainsKey(e.KeyCode.ToString()))
                 {
-                    if (m_keyList.ContainsKey(e.KeyCode.ToString()))
-                    {
-                        int _x = m_keyList[e.KeyCode.ToString()].X;
-                        int _y = m_keyList[e.KeyCode.ToString()].Y;
-                        MouseLeftClick(_x, _y);
-                        // Click chuột trái
-                        //mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
-                        //mouse_event(MOUSEEVENTF_LEFTUP, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
-                        Thread.Sleep(50);
+                    int _x = m_keyList[e.KeyCode.ToString()].X;
+                    int _y = m_keyList[e.KeyCode.ToString()].Y;
+                    MouseLeftClick(_x, _y);
+                    // Click chuột trái
+                    //mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                    //mouse_event(MOUSEEVENTF_LEFTUP, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                    Thread.Sleep(50);
 
-                    }
                 }
-
             }
             Console.WriteLine($"Key pressed: {e.KeyCode}");
             txtKeySel.Text = e.KeyCode.ToString();
