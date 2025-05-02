@@ -42,28 +42,33 @@ namespace PPer.ControlMouse
         const uint MOUSEEVENTF_LEFTUP = 0x0004;
         const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
         const uint MOUSEEVENTF_RIGHTUP = 0x0010;
-
-        public static void MouseLeftClick(int x, int y)
+        private bool useClick = false;
+        public void MouseLeftClick(int x, int y)
         {
+            if (useClick == true) return;
+            useClick = true;
+
             SetCursorPos(x, y);
             mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+            Thread.Sleep(5);
             mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+            useClick = false;
         }
 
-        public static void MouseRightClick(int x, int y)
+        public void MouseRightClick(int x, int y)
         {
             SetCursorPos(x, y);
             mouse_event(MOUSEEVENTF_RIGHTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
             mouse_event(MOUSEEVENTF_RIGHTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
         }
 
-        public static void MouseLeftDown(int x, int y)
+        public void MouseLeftDown(int x, int y)
         {
             SetCursorPos(x, y);
             mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
         }
 
-        public static void MouseLeftUp(int x, int y)
+        public void MouseLeftUp(int x, int y)
         {
             SetCursorPos(x, y);
             mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
@@ -89,7 +94,7 @@ namespace PPer.ControlMouse
         {
 
             InitializeComponent();
-
+            this.TopLevel = true;
             txtKeySel = txtKeySelected;
             txtPosSel = txtPosSelected;
             string[] listNames = Enum.GetNames(typeof(run_mode)).ToArray();
@@ -138,22 +143,27 @@ namespace PPer.ControlMouse
             txtKeySel.Text = $"Mouse Move at: {e.Location}";
         }
 
+        private object lockSetMouse = new object();
         private void GlobalHookKeyDown(object sender, KeyEventArgs e)
         {
-            if (cbbRunMode.Text == run_mode.auto.ToString())
+            lock (lockSetMouse)
             {
-                if (m_keyList.ContainsKey(e.KeyCode.ToString()))
+                if (cbbRunMode.Text == run_mode.auto.ToString())
                 {
-                    int _x = m_keyList[e.KeyCode.ToString()].X;
-                    int _y = m_keyList[e.KeyCode.ToString()].Y;
-                    SetCursorPos(_x, _y);
-                    MouseLeftClick(_x, _y);
-                    // Click chuột trái
-                    //mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
-                    //mouse_event(MOUSEEVENTF_LEFTUP, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                    if (m_keyList.ContainsKey(e.KeyCode.ToString()))
+                    {
+                        int _x = m_keyList[e.KeyCode.ToString()].X;
+                        int _y = m_keyList[e.KeyCode.ToString()].Y;
+                        MouseLeftClick(_x, _y);
+                        // Click chuột trái
+                        //mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                        //mouse_event(MOUSEEVENTF_LEFTUP, (uint)_x, (uint)_y, 0, UIntPtr.Zero);
+                        Thread.Sleep(50);
 
+                    }
                 }
-            }    
+
+            }
             Console.WriteLine($"Key pressed: {e.KeyCode}");
             txtKeySel.Text = e.KeyCode.ToString();
             
